@@ -35,17 +35,18 @@ def train_model(inputData) :
     y = inputData.drop(['p1', 'p2'], axis = 1)
     
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=57
+        X, y, test_size=0.1, random_state=93
     )
 
     rfr = RandomForestRegressor(
-        n_estimators=200, random_state=19, n_jobs=-1
+        n_estimators=200, random_state=23, n_jobs=-1
     )
     rfr.fit(X_train, y_train)
 
-    # rfr_cv = GridSearchCV(estimator=rfr, param_grid=param_grid, cv=3, scoring='neg_mean_squared_error', n_jobs=-1)
-    # rfr_cv.fit(X_train, y_train)
-    # rfr = rfr_cv.best_estimator_
+    # Hyperparameterization
+    rfr_cv = GridSearchCV(estimator=rfr, param_grid=param_grid, cv=3, scoring='neg_mean_squared_error', n_jobs=-1)
+    rfr_cv.fit(X_train, y_train)
+    rfr = rfr_cv.best_estimator_
     
     y_pred = rfr.predict(X_test)
     print("RMSE: " + str(root_mean_squared_error(y_test, y_pred)))
@@ -91,10 +92,18 @@ df['p2'] = df['p2'].str.split('.').str[0]
 df = df.drop(['perturbation'], axis = 1)
 print(df)
 
+t1 = time.time()
 model = train_model(df)
+t2 = time.time()
 
-run_on_test_set("data/test_set.csv", "prediction/prediction.csv", model)
+print(f'  -- finished in {(t2 - t1) / 60} minutes')
+
+run_on_test_set("data/test_set.csv", "prediction/model2_3paramtuned_prediction_90_10_split_TIMED_3.csv", model)
 
 # rmse on untuned: 0.37320167870428955
 # rmse on 2 param tune: 0.3741263663381296
-# rmse on 3 param tune: 
+# rmse on 3 param tune: 0.37272941493927264
+# rmses for 3 param 90/10:
+# - 0.3722586099821958
+# - 0.37121324670825867
+# - 
